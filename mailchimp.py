@@ -1,8 +1,15 @@
+"""Provides all mailchimp api functions."""
+
 from mailchimp_marketing import Client
 from mailchimp_marketing.api_client import ApiClientError
 import os
 from dotenv import load_dotenv
 import hashlib
+
+# ultimate flow:
+# get client
+# add all new contacts to argo db
+# add downloaded app tag to all new people
 
 
 def get_client():
@@ -14,6 +21,7 @@ def get_client():
         {"api_key": os.getenv("MAILCHIMP_API"), "server": os.getenv("MAILCHIMP_SERVER")}
     )
     return client
+
 
 def get_all_account_lists():
     client = get_client()
@@ -96,6 +104,7 @@ def view_contacts_tags():
 
 
 def bulk_tag():
+    """https://mailchimp.com/developer/marketing/guides/organize-contacts-with-tags/"""
     tag_id = "649346"
     list_id = "d73bda636d"
     client = get_client()
@@ -115,6 +124,7 @@ def bulk_tag():
 
 
 def bulk_subscribe():
+    """https://mailchimp.com/developer/marketing/api/lists/batch-subscribe-or-unsubscribe/"""
     list_id = "d73bda636d"
     member_info = {
         "email_address": "mock1@mock.com",
