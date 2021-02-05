@@ -12,8 +12,10 @@ httplib2==0.18.1
 idna==2.10
 iniconfig==1.1.1
 mailchimp-marketing==3.0.28
+numpy==1.20.0
 oauthlib==3.1.0
 packaging==20.9
+pandas==1.2.1
 pluggy==0.13.1
 protobuf==3.14.0
 py==1.10.0

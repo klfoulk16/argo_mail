@@ -6,23 +6,23 @@ from dotenv import set_key, load_dotenv
 import os
 
 
-def reformat_csv(file_contents):
+def reformat_csv(file_contents, last_user_id):
     """Takes the content from the google file, cleans it and puts it into a formatted dataframe"""
     data = str(file_contents, 'utf-8')
     data = StringIO(data)
     df = pd.read_csv(data)
     df = df.sort_values("id", axis=0)
-    df = df.loc[df['id'] > os.getenv("LAST_USER_ID"), ['id', 'provider', 'username', 'email', 'first_name', 'last_name']].reset_index()
+    df = df.loc[df['id'] > last_user_id, ['id', 'provider', 'username', 'email', 'first_name', 'last_name']].reset_index(drop=True)
+    return df
 
-
-def subscribe_and_tag(df):
+def subscribe_and_tag(df, mailchimp_client):
     """Pulls data from the dataframe and sends it to the tag/subscribe functions"""
     subscribers = []
     emails = []
     count = 0
     for row in range(len(df.index)):
         if count == 499:
-            mailchimp.bulk_subscribe(subscribers)
+            mailchimp.bulk_subscribe(subscribers, mailchimp_client)
             count = 0
             subscribers = []
         member = {
@@ -31,7 +31,7 @@ def subscribe_and_tag(df):
             "merge_fields": {
             "FNAME": df["first_name"][row],
             "LNAME": df["last_name"][row],
-            "MMERGE3": df.index[row],  # user id
+            "MMERGE3": df["id"][row],  # user id
             "MMERGE6": df["provider"][row],  # provider
             "MMERGE8": df["username"][row]  # username
             }
@@ -39,7 +39,8 @@ def subscribe_and_tag(df):
         subscribers.append(member)
         emails.append(df["email"][row])
         count += 1
-    mailchimp.bulk_tag(emails)
+    mailchimp.bulk_subscribe(subscribers, mailchimp_client)
+    mailchimp.bulk_tag(emails, mailchimp_client)
 
 
 def set_last_user_id(df):
@@ -53,19 +54,22 @@ if __name__ == '__main__':
     load_dotenv()
 
     # name of file to be used
-    file_id = "1UJQnlz7IxJ27hqvnPYXl4jm-oWjr2Zo4"
+    file_id = "1zeYWzL1hsJsEbT9IeKoE7MrJ7bhpOgc1"
 
     # get google drive connection
-    service = googledrive.get_service()
+    googledrive_service = googledrive.get_service()
 
     # read file contents
-    file_contents = googledrive.print_file_content(service, file_id)
+    file_contents = googledrive.print_file_content(googledrive_service, file_id)
 
     # extract important data from file contents to df using pandas
     df = reformat_csv(file_contents)
 
+    mailchimp_client = mailchimp.get_client(os.getenv("MAILCHIMP_API"), os.getenv("MAILCHIMP_SERVER"))
+
     # reformat said data for mailchimp and then subscribe/tag the new subscribers
-    subscribe_and_tag(df)
+    last_user_id = int(os.getenv("LAST_USER_ID"))
+    subscribe_and_tag(df, mailchimp_client)
 
     # update id of last user imported in .env file
     set_last_user_id(df)

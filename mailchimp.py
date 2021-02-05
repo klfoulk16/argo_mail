@@ -2,24 +2,18 @@
 
 from mailchimp_marketing import Client
 from mailchimp_marketing.api_client import ApiClientError
-import os
-from dotenv import load_dotenv
 import hashlib
 
 
-def get_client():
-    # Get environment variables
-    load_dotenv()
-
+def get_client(mailchimp_api_key, mailchimp_server):
     client = Client()
     client.set_config(
-        {"api_key": os.getenv("MAILCHIMP_API"), "server": os.getenv("MAILCHIMP_SERVER")}
+        {"api_key": mailchimp_api_key, "server": mailchimp_server}
     )
     return client
 
 
-def get_all_account_lists():
-    client = get_client()
+def get_all_account_lists(client):
     try:
         response = client.lists.get_all_lists()
         print(response)
@@ -37,7 +31,7 @@ def get_list_merge_fields():
         print("Error: {}".format(error.text))
 
 
-def add_subscriber():
+def add_subscriber(client):
     list_id = "d73bda636d"
     member_info = {
         "email_address": "mock1@mock.com",
@@ -50,7 +44,6 @@ def add_subscriber():
           "MMERGE8": "mock1"  # username
         }
     }
-    client = get_client()
     try:
         response = client.lists.add_list_member(list_id, member_info)
         print(f"response: {response}")
@@ -58,7 +51,7 @@ def add_subscriber():
         print(f"An exception occurred: {error.text}")
 
 
-def add_or_update_subscriber():
+def add_or_update_subscriber(client):
     list_id = "d73bda636d"
     email = "mock1@mock.com"
     subscriber_info = {
@@ -73,7 +66,6 @@ def add_or_update_subscriber():
         }
     }
     subscriber_hash = hashlib.md5(email.encode('utf-8')).hexdigest()
-    client = get_client()
     try:
         response = client.lists.set_list_member(
             list_id,
@@ -85,12 +77,10 @@ def add_or_update_subscriber():
         print(f"An exception occurred: {error.text}")
 
 
-def view_contacts_tags():
+def view_contacts_tags(client):
     list_id = "d73bda636d"
     email = "klf16@my.fsu.edu"
     subscriber_hash = hashlib.md5(email.encode('utf-8')).hexdigest()
-
-    client = get_client()
     try:
         response = client.lists.get_list_member_tags(list_id, subscriber_hash)
         print(f"response: {response}")
@@ -98,11 +88,10 @@ def view_contacts_tags():
         print(f"An exception occurred: {error.text}")
 
 
-def bulk_tag():
+def bulk_tag(client):
     """https://mailchimp.com/developer/marketing/guides/organize-contacts-with-tags/"""
     tag_id = "649346"
     list_id = "d73bda636d"
-    client = get_client()
     try:
         response = client.lists.batch_segment_members({
             "members_to_add": [
@@ -118,7 +107,7 @@ def bulk_tag():
         print(f"An exception occurred: {error.text}")
 
 
-def bulk_subscribe():
+def bulk_subscribe(client):
     """https://mailchimp.com/developer/marketing/api/lists/batch-subscribe-or-unsubscribe/"""
     list_id = "d73bda636d"
     member_info = {
@@ -132,7 +121,6 @@ def bulk_subscribe():
           "MMERGE8": "magicmock1"  # username
         },
     }
-    client = get_client()
     try:
         # can only add up to 500 at a time
         response = client.lists.batch_list_members(list_id, {"members": [member_info], "update_existing":True})
