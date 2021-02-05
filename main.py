@@ -20,9 +20,18 @@ def subscribe_and_tag(df, mailchimp_client):
     subscribers = []
     emails = []
     count = 0
+    my_total = 0
+    mailchimp_created = 0
+    mailchimp_updated = 0
+    mailchimp_error_count = 0
     for row in range(len(df.index)):
         if count == 499:
-            mailchimp.bulk_subscribe(subscribers, mailchimp_client)
+            created, updated, error_count, errors = mailchimp.bulk_subscribe(subscribers, mailchimp_client)
+            mailchimp_created += created
+            mailchimp_updated += updated
+            mailchimp_error_count += error_count
+            for error in errors:
+                print(f"There was an error: {error}")
             count = 0
             subscribers = []
         member = {
@@ -39,8 +48,21 @@ def subscribe_and_tag(df, mailchimp_client):
         subscribers.append(member)
         emails.append(df["email"][row])
         count += 1
-    mailchimp.bulk_subscribe(subscribers, mailchimp_client)
-    mailchimp.bulk_tag(emails, mailchimp_client)
+        my_total += 1
+    created, updated, error_count, errors = mailchimp.bulk_subscribe(subscribers, mailchimp_client)
+    mailchimp_created += created
+    mailchimp_updated += updated
+    mailchimp_error_count += error_count
+    for error in errors:
+        print(f"There was an error: {error}")
+    print(f"Created: {mailchimp_created}, Updated: {mailchimp_updated}, Errors: {mailchimp_error_count}")
+    mailchimp_total = mailchimp_created + mailchimp_updated + mailchimp_error_count
+    if my_total == mailchimp_total:
+        print("My total matched mailchimp's")
+    else:
+        print(f"My estimate of users to add ({my_total}) was not the same as the number mailchimp added ({mailchimp_total})")
+    tagged = mailchimp.bulk_tag(emails, mailchimp_client)
+    print(f"Total tagged: {tagged}")
 
 
 def set_last_user_id(df):
@@ -48,8 +70,7 @@ def set_last_user_id(df):
     set_key(".env", "LAST_USER_ID", last_id)
 
 
-if __name__ == '__main__':
-    
+def main():
     # get environment variables
     load_dotenv()
 
@@ -63,13 +84,21 @@ if __name__ == '__main__':
     file_contents = googledrive.print_file_content(googledrive_service, file_id)
 
     # extract important data from file contents to df using pandas
-    df = reformat_csv(file_contents)
-
-    mailchimp_client = mailchimp.get_client(os.getenv("MAILCHIMP_API"), os.getenv("MAILCHIMP_SERVER"))
-
-    # reformat said data for mailchimp and then subscribe/tag the new subscribers
     last_user_id = int(os.getenv("LAST_USER_ID"))
-    subscribe_and_tag(df, mailchimp_client)
+    df = reformat_csv(file_contents, last_user_id)
 
-    # update id of last user imported in .env file
-    set_last_user_id(df)
+    # handle case of no new subscribers
+    if len(df) > 0:
+        mailchimp_client = mailchimp.get_client(os.getenv("MAILCHIMP_API"), os.getenv("MAILCHIMP_SERVER"))
+
+        # reformat said data for mailchimp and then subscribe/tag the new subscribers
+        subscribe_and_tag(df, mailchimp_client)
+
+        # update id of last user imported in .env file
+        set_last_user_id(df)
+    else:
+        print("There were no new subscribers")
+
+
+if __name__ == '__main__':
+    main()

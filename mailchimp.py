@@ -88,7 +88,7 @@ def view_contacts_tags(client):
         print(f"An exception occurred: {error.text}")
 
 
-def bulk_tag(client):
+def bulk_tag(emails, client):
     """https://mailchimp.com/developer/marketing/guides/organize-contacts-with-tags/"""
     tag_id = "649346"
     list_id = "d73bda636d"
@@ -102,12 +102,13 @@ def bulk_tag(client):
             list_id,
             tag_id
         )
-        print(f"response: {response}")
+        return response['total_added']
     except ApiClientError as error:
         print(f"An exception occurred: {error.text}")
+        quit()
 
 
-def bulk_subscribe(client):
+def bulk_subscribe(subscribers, client):
     """https://mailchimp.com/developer/marketing/api/lists/batch-subscribe-or-unsubscribe/"""
     list_id = "d73bda636d"
     member_info = {
@@ -118,12 +119,13 @@ def bulk_subscribe(client):
           "LNAME": "McVankab",
           "MMERGE3": 0,  # user id
           "MMERGE6": "facebook",  # provider
-          "MMERGE8": "magicmock1"  # username
+          "MMERGE8": "magicmock10"  # username
         },
     }
     try:
         # can only add up to 500 at a time
         response = client.lists.batch_list_members(list_id, {"members": [member_info], "update_existing":True})
-        print(f"response: {response}")
+        return (response['total_created'], response['total_updated'], response['error_count'], response['errors'])
     except ApiClientError as error:
         print(f"An exception occurred: {error.text}")
+        quit()
