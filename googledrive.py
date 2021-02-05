@@ -8,6 +8,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from apiclient import errors
 
+
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
 
@@ -53,9 +54,6 @@ def print_file_content(service, file_id):
     except errors.HttpError as error:
         print(f'An error occurred: {error}')
 
-
-def mock_print_file_content(service, file_id):
-    return b'Activity Date,Distance in Miles,Activity Type\r\n2021-02-02,1.15,Walk\r\n2021-02-02,14.74,Ride\r\n2021-02-02,0.71,Walk\r\n2021-02-02,0.7,Ride\r\n2021-02-02,4.27,Walk\r\n2021-02-02,0.7,Ride\r\n2021-02-02,3.42,Walk\r\n2021-02-02,5.57,Ride\r\n2021-02-02,2.64,Walk\r\n2021-02-02,0.47,Walk\r\n'
 
 if __name__ == '__main__':
     file_id = "1UJQnlz7IxJ27hqvnPYXl4jm-oWjr2Zo4"

@@ -6,11 +6,6 @@ import os
 from dotenv import load_dotenv
 import hashlib
 
-# ultimate flow:
-# get client
-# add all new contacts to argo db
-# add downloaded app tag to all new people
-
 
 def get_client():
     # Get environment variables
