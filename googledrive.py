@@ -53,10 +53,3 @@ def print_file_content(service, file_id):
         
     except errors.HttpError as error:
         print(f'An error occurred: {error}')
-
-
-if __name__ == '__main__':
-    # real : 1HYdYrD_UmdG1cw9g76Kp7alnoiF3UMb0
-    file_id = "1zeYWzL1hsJsEbT9IeKoE7MrJ7bhpOgc1"
-    service = get_service()
-    print(print_file_content(service, file_id))
