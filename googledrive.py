@@ -13,8 +13,10 @@ from apiclient import errors
 SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
 
 def get_service():
-    """Shows basic usage of the Drive v3 API.
-    Prints the names and ids of the first 10 files the user has access to.
+    """Sets up a google drive client for API access.
+
+    Returns:
+    Google Drive client
     """
     creds = None
     # The file token.pickle stores the user's access and refresh tokens, and is

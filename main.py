@@ -8,7 +8,14 @@ import datetime
 
 
 def reformat_csv(file_contents, last_user_id):
-    """Takes the content from the google file, cleans it and puts it into a formatted dataframe"""
+    """Takes the content from the google file, cleans it and puts it into a formatted dataframe
+    
+    Args:
+    file_contents: Byte string of file contents
+    last_user_id: Int, id of last user imported to milchimp.
+    
+    Returns:
+    Dataframe of the users that haven't yet been imported with only the values that are needed."""
     data = str(file_contents, 'utf-8')
     data = StringIO(data)
     df = pd.read_csv(data)
@@ -17,7 +24,12 @@ def reformat_csv(file_contents, last_user_id):
     return df
 
 def subscribe_and_tag(df, mailchimp_client):
-    """Pulls data from the dataframe and sends it to the tag/subscribe functions"""
+    """Pulls data from the dataframe, sends it to the tag/subscribe functions and prints results.
+
+    Args:
+    df: Dataframe of users to be subscribed to mailchimp with proper info.
+    mailchimp_client: Mailchimp client
+    """
     subscribers = []
     emails = []
     count = 0
@@ -67,12 +79,20 @@ def subscribe_and_tag(df, mailchimp_client):
 
 
 def set_last_user_id(df):
+    """Set the value of LAST_USER_ID in our .env file to be the highest id we imported today.
+    
+    Args:
+    df: Dataframe of users that were imported to mailchimp."""
     last_id = str(df['id'].max())
     print(f"Users added through {last_id}")
     set_key(".env", "LAST_USER_ID", last_id)
 
 
 def main():
+    """Downloads file of all users from GoogleDrive, pulls information for the new users,
+    subscribes them to mailchimp and tags them 'Downloaded app'"""
+
+    # for the cron logs
     print(datetime.datetime.now())
     
     # get environment variables
