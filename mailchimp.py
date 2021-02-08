@@ -93,12 +93,8 @@ def bulk_tag(emails, client):
     tag_id = "649346"
     list_id = "d73bda636d"
     try:
-        response = client.lists.batch_segment_members({
-            "members_to_add": [
-                "mock1@mock.com",
-                "klf16@my.fsu.edu"
-                ]
-            },
+        response = client.lists.batch_segment_members(
+            {"members_to_add": emails},
             list_id,
             tag_id
         )
@@ -111,20 +107,20 @@ def bulk_tag(emails, client):
 def bulk_subscribe(subscribers, client):
     """https://mailchimp.com/developer/marketing/api/lists/batch-subscribe-or-unsubscribe/"""
     list_id = "d73bda636d"
-    member_info = {
-        "email_address": "mock1@mock.com",
-        "status": "subscribed",
-        "merge_fields": {
-          "FNAME": "Prudence",
-          "LNAME": "McVankab",
-          "MMERGE3": 0,  # user id
-          "MMERGE6": "facebook",  # provider
-          "MMERGE8": "magicmock10"  # username
-        },
-    }
+    # member_info = {
+    #     "email_address": "mock1@mock.com",
+    #     "status": "subscribed",
+    #     "merge_fields": {
+    #       "FNAME": "Prudence",
+    #       "LNAME": "McVankab",
+    #       "MMERGE3": 0,  # user id
+    #       "MMERGE6": "facebook",  # provider
+    #       "MMERGE8": "magicmock10"  # username
+    #     },
+    # }
     try:
         # can only add up to 500 at a time
-        response = client.lists.batch_list_members(list_id, {"members": [member_info], "update_existing":True})
+        response = client.lists.batch_list_members(list_id, {"members": subscribers, "update_existing":True})
         return (response['total_created'], response['total_updated'], response['error_count'], response['errors'])
     except ApiClientError as error:
         print(f"An exception occurred: {error.text}")

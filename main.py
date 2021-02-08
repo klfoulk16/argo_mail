@@ -4,6 +4,7 @@ import googledrive
 import mailchimp
 from dotenv import set_key, load_dotenv
 import os
+import datetime
 
 
 def reformat_csv(file_contents, last_user_id):
@@ -40,7 +41,7 @@ def subscribe_and_tag(df, mailchimp_client):
             "merge_fields": {
             "FNAME": df["first_name"][row],
             "LNAME": df["last_name"][row],
-            "MMERGE3": df["id"][row],  # user id
+            "MMERGE3": int(df["id"][row]),  # user id
             "MMERGE6": df["provider"][row],  # provider
             "MMERGE8": df["username"][row]  # username
             }
@@ -67,15 +68,19 @@ def subscribe_and_tag(df, mailchimp_client):
 
 def set_last_user_id(df):
     last_id = str(df['id'].max())
+    print(f"Users added through {last_id}")
     set_key(".env", "LAST_USER_ID", last_id)
 
 
 def main():
+    print(datetime.datetime.now())
+    
     # get environment variables
     load_dotenv()
 
     # name of file to be used
-    file_id = "1zeYWzL1hsJsEbT9IeKoE7MrJ7bhpOgc1"
+    # 1zeYWzL1hsJsEbT9IeKoE7MrJ7bhpOgc1
+    file_id = os.getenv("FILE_ID")
 
     # get google drive connection
     googledrive_service = googledrive.get_service()
@@ -96,6 +101,7 @@ def main():
 
         # update id of last user imported in .env file
         set_last_user_id(df)
+
     else:
         print("There were no new subscribers")
 
