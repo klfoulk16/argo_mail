@@ -3,8 +3,6 @@
 import smtplib
 import ssl
 from email.mime.text import MIMEText
-from dotenv import load_dotenv
-import os
 
 
 def new_imports_log(mailchimp_created, mailchimp_updated, mailchimp_error_count, errors, tagged):
