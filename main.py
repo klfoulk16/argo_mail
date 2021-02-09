@@ -5,6 +5,7 @@ import mailchimp
 from dotenv import set_key, load_dotenv
 import os
 import datetime
+import mail_logs
 
 
 def reformat_csv(file_contents, last_user_id):
@@ -33,7 +34,6 @@ def subscribe_and_tag(df, mailchimp_client):
     subscribers = []
     emails = []
     count = 0
-    my_total = 0
     mailchimp_created = 0
     mailchimp_updated = 0
     mailchimp_error_count = 0
@@ -61,21 +61,12 @@ def subscribe_and_tag(df, mailchimp_client):
         subscribers.append(member)
         emails.append(df["email"][row])
         count += 1
-        my_total += 1
     created, updated, error_count, errors = mailchimp.bulk_subscribe(subscribers, mailchimp_client)
     mailchimp_created += created
     mailchimp_updated += updated
     mailchimp_error_count += error_count
-    for error in errors:
-        print(f"There was an error: {error}")
-    print(f"Created: {mailchimp_created}, Updated: {mailchimp_updated}, Errors: {mailchimp_error_count}")
-    mailchimp_total = mailchimp_created + mailchimp_updated + mailchimp_error_count
-    if my_total == mailchimp_total:
-        print("My total matched mailchimp's")
-    else:
-        print(f"My estimate of users to add ({my_total}) was not the same as the number mailchimp added ({mailchimp_total})")
     tagged = mailchimp.bulk_tag(emails, mailchimp_client)
-    print(f"Total tagged: {tagged}")
+    mail_logs.mail_daily_log(mailchimp_created, mailchimp_updated, mailchimp_error_count, errors, tagged)
 
 
 def set_last_user_id(df):
@@ -123,7 +114,7 @@ def main():
         set_last_user_id(df)
 
     else:
-        print("There were no new subscribers")
+        mail_logs.no_new_imports_log()
 
 
 if __name__ == '__main__':
