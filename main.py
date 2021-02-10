@@ -39,6 +39,7 @@ def subscribe_and_tag(df, mailchimp_client):
     mailchimp_created = 0
     mailchimp_updated = 0
     mailchimp_error_count = 0
+    mailchimp_errors = []
     for row in range(len(df.index)):
         if count == 499:
             created, updated, error_count, errors = mailchimp.bulk_subscribe(subscribers, mailchimp_client)
@@ -46,7 +47,7 @@ def subscribe_and_tag(df, mailchimp_client):
             mailchimp_updated += updated
             mailchimp_error_count += error_count
             for error in errors:
-                print(f"There was an error: {error}")
+                mailchimp_errors.append(error)
             count = 0
             subscribers = []
         member = {
@@ -67,8 +68,10 @@ def subscribe_and_tag(df, mailchimp_client):
     mailchimp_created += created
     mailchimp_updated += updated
     mailchimp_error_count += error_count
+    for error in errors:
+        mailchimp_errors.append(error)
     tagged = mailchimp.bulk_tag(emails, mailchimp_client)
-    mail_logs.mail_daily_log(mailchimp_created, mailchimp_updated, mailchimp_error_count, errors, tagged)
+    mail_logs.new_imports_log(mailchimp_created, mailchimp_updated, mailchimp_error_count, errors, tagged, os.getenv('GMAIL_PASS'))
 
 
 def set_last_user_id(df):
@@ -117,7 +120,7 @@ def main():
 
     else:
         # email myself that there were no imports today
-        mail_logs.no_new_imports_log()
+        mail_logs.no_new_imports_log(os.getenv('GMAIL_PASS'))
 
 
 if __name__ == '__main__':
