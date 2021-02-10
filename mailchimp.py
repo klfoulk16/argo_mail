@@ -21,88 +21,6 @@ def get_client(mailchimp_api_key, mailchimp_server):
     return client
 
 
-def get_all_account_lists(client):
-    """Fetches all lists that are part of the given account.
-    
-    Args:
-    client: Mailchimp client"""
-    try:
-        response = client.lists.get_all_lists()
-        print(response)
-    except ApiClientError as error:
-        print(f"Error: {error}")
-
-
-def get_list_merge_fields():
-    """Prints out list of merge fields for list hardcoded in list_id."""
-    client = get_client()
-    list_id = "d73bda636d"
-    try:
-        response = client.lists.get_list_merge_fields(list_id)
-        print(response)
-    except ApiClientError as error:
-        print("Error: {}".format(error.text))
-
-
-def add_subscriber(client):
-    """Deprecated: Add the subscriber hardcoded in member_info."""
-    list_id = "d73bda636d"
-    member_info = {
-        "email_address": "mock1@mock.com",
-        "status": "subscribed",
-        "merge_fields": {
-          "FNAME": "Prudence",
-          "LNAME": "McVankab",
-          "MMERGE3": 0,  # user id
-          "MMERGE6": "facebook",  # provider
-          "MMERGE8": "mock1"  # username
-        }
-    }
-    try:
-        response = client.lists.add_list_member(list_id, member_info)
-        print(f"response: {response}")
-    except ApiClientError as error:
-        print(f"An exception occurred: {error.text}")
-
-
-def add_or_update_subscriber(client):
-    """Deprecated: Add or update the subscriber hardcoded in subscriber_info."""
-    list_id = "d73bda636d"
-    email = "mock1@mock.com"
-    subscriber_info = {
-        "email_address": email,
-        "status_if_new": "subscribed",
-        "merge_fields": {
-            "FNAME": "Prudence",
-            "LNAME": "McVankab",
-            "MMERGE3": 0,  # user id
-            "MMERGE6": "apple",  # provider (changed)
-            "MMERGE8": "mock1"  # username
-        }
-    }
-    subscriber_hash = hashlib.md5(email.encode('utf-8')).hexdigest()
-    try:
-        response = client.lists.set_list_member(
-            list_id,
-            subscriber_hash,
-            subscriber_info
-        )
-        print(f"response: {response}")
-    except ApiClientError as error:
-        print(f"An exception occurred: {error.text}")
-
-
-def view_contacts_tags(client):
-    list_id = "d73bda636d"
-    email = "klf16@my.fsu.edu"
-    subscriber_hash = hashlib.md5(email.encode('utf-8')).hexdigest()
-    try:
-        response = client.lists.get_list_member_tags(list_id, subscriber_hash)
-        print(f"response: {response}")
-    except ApiClientError as error:
-        print(f"An exception occurred: {error.text}")
-
-
 def bulk_tag(emails, client):
     """Takes a list of subscribed emails and adds specified mailchimp tag to all emails
     
@@ -155,3 +73,97 @@ def bulk_subscribe(subscribers, client):
     except ApiClientError as error:
         print(f"An exception occurred: {error.text}")
         quit()
+
+
+def get_all_account_lists(client):
+    """Used in Setup: Fetches all lists that are part of the given account.
+    
+    Args:
+    client: Mailchimp client"""
+    try:
+        response = client.lists.get_all_lists()
+        print(response)
+    except ApiClientError as error:
+        print(f"Error: {error}")
+
+
+def get_list_merge_fields(client):
+    """Used in Setup: Prints out list of merge fields for list hardcoded in list_id.
+    
+    Args:
+    client: Mailchimp client"""
+    list_id = "d73bda636d"
+    try:
+        response = client.lists.get_list_merge_fields(list_id)
+        print(response)
+    except ApiClientError as error:
+        print("Error: {}".format(error.text))
+
+
+def add_subscriber(client):
+    """Used in Setup: Add the subscriber hardcoded in member_info.
+    
+    Args:
+    client: Mailchimp client"""
+    list_id = "d73bda636d"
+    member_info = {
+        "email_address": "mock1@mock.com",
+        "status": "subscribed",
+        "merge_fields": {
+          "FNAME": "Prudence",
+          "LNAME": "McVankab",
+          "MMERGE3": 0,  # user id
+          "MMERGE6": "facebook",  # provider
+          "MMERGE8": "mock1"  # username
+        }
+    }
+    try:
+        response = client.lists.add_list_member(list_id, member_info)
+        print(f"response: {response}")
+    except ApiClientError as error:
+        print(f"An exception occurred: {error.text}")
+
+
+def add_or_update_subscriber(client):
+    """Used in Setup: Add or update the subscriber hardcoded in subscriber_info.
+    
+    Args:
+    client: Mailchimp client"""
+    list_id = "d73bda636d"
+    email = "mock1@mock.com"
+    subscriber_info = {
+        "email_address": email,
+        "status_if_new": "subscribed",
+        "merge_fields": {
+            "FNAME": "Prudence",
+            "LNAME": "McVankab",
+            "MMERGE3": 0,  # user id
+            "MMERGE6": "apple",  # provider (changed)
+            "MMERGE8": "mock1"  # username
+        }
+    }
+    subscriber_hash = hashlib.md5(email.encode('utf-8')).hexdigest()
+    try:
+        response = client.lists.set_list_member(
+            list_id,
+            subscriber_hash,
+            subscriber_info
+        )
+        print(f"response: {response}")
+    except ApiClientError as error:
+        print(f"An exception occurred: {error.text}")
+
+
+def view_contacts_tags(client):
+    """Used in Setup: View all tags associated with a contact.
+
+    Args:
+    client: Mailchimp client"""
+    list_id = "d73bda636d"
+    email = "klf16@my.fsu.edu"
+    subscriber_hash = hashlib.md5(email.encode('utf-8')).hexdigest()
+    try:
+        response = client.lists.get_list_member_tags(list_id, subscriber_hash)
+        print(f"response: {response}")
+    except ApiClientError as error:
+        print(f"An exception occurred: {error.text}")

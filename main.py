@@ -1,3 +1,5 @@
+""""The heart of the project - downloads csv and pushes new users to mailchimp"""
+
 from io import StringIO
 import pandas as pd
 import googledrive
@@ -90,7 +92,7 @@ def main():
     load_dotenv()
 
     # name of file to be used
-    # 1zeYWzL1hsJsEbT9IeKoE7MrJ7bhpOgc1
+    # test: 1zeYWzL1hsJsEbT9IeKoE7MrJ7bhpOgc1
     file_id = os.getenv("FILE_ID")
 
     # get google drive connection
@@ -114,6 +116,7 @@ def main():
         set_last_user_id(df)
 
     else:
+        # email myself that there were no imports today
         mail_logs.no_new_imports_log()
 
 
