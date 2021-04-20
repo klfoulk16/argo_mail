@@ -36,6 +36,7 @@ def subscribe_and_tag(df, mailchimp_client):
     subscribers = []
     emails = []
     count = 0
+    tagged = 0
     mailchimp_created = 0
     mailchimp_updated = 0
     mailchimp_error_count = 0
@@ -43,6 +44,7 @@ def subscribe_and_tag(df, mailchimp_client):
     for row in range(len(df.index)):
         if count == 499:
             created, updated, error_count, errors = mailchimp.bulk_subscribe(subscribers, mailchimp_client)
+            tagged += mailchimp.bulk_tag(emails, mailchimp_client)
             mailchimp_created += created
             mailchimp_updated += updated
             mailchimp_error_count += error_count
@@ -50,6 +52,7 @@ def subscribe_and_tag(df, mailchimp_client):
                 mailchimp_errors.append(error)
             count = 0
             subscribers = []
+            emails = []
         member = {
             "email_address": df["email"][row],
             "status": "subscribed",
@@ -65,12 +68,12 @@ def subscribe_and_tag(df, mailchimp_client):
         emails.append(df["email"][row])
         count += 1
     created, updated, error_count, errors = mailchimp.bulk_subscribe(subscribers, mailchimp_client)
+    tagged += mailchimp.bulk_tag(emails, mailchimp_client)
     mailchimp_created += created
     mailchimp_updated += updated
     mailchimp_error_count += error_count
     for error in errors:
         mailchimp_errors.append(error)
-    tagged = mailchimp.bulk_tag(emails, mailchimp_client)
     mail_logs.new_imports_log(mailchimp_created, mailchimp_updated, mailchimp_error_count, errors, tagged)
 
 
@@ -112,15 +115,19 @@ def main():
     if len(df) > 0:
         mailchimp_client = mailchimp.get_client(os.getenv("MAILCHIMP_API"), os.getenv("MAILCHIMP_SERVER"))
 
-        # reformat said data for mailchimp and then subscribe/tag the new subscribers
-        subscribe_and_tag(df, mailchimp_client)
-
-        # update id of last user imported in .env file
-        set_last_user_id(df)
+        try:
+            # reformat said data for mailchimp and then subscribe/tag the new subscribers
+            subscribe_and_tag(df, mailchimp_client)
+            # update id of last user imported in .env file
+            set_last_user_id(df)
+        except Exception as e:
+            message = f"There was an error during subscribe and tag:\n {e}"
+            print(message)
+            mail_logs.other_news_log("Error", message)
 
     else:
         # email myself that there were no imports today
-        mail_logs.no_new_imports_log()
+        mail_logs.other_news_log("Argo Email: No New Users", "No new Argo users to import today.")
 
 
 if __name__ == '__main__':

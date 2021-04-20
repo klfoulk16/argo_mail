@@ -38,9 +38,13 @@ def new_imports_log(mailchimp_created, mailchimp_updated, mailchimp_error_count,
         server.sendmail(sender_email, receiver_email, msg.as_string())
         
 
-def no_new_imports_log():
+def other_news_log(subject, message):
     """
     Sends email notifying me that the script ran but there were no new users to import.
+    
+    Args:
+    subject: Str, subject for email
+    message: Str, email content
     """
     port = 465  # For SSL
     sender_email = os.getenv('SENDER_EMAIL')
@@ -48,10 +52,9 @@ def no_new_imports_log():
     password = os.getenv('EMAIL_PASSWORD')
     smtp_server = "smtp.gmail.com"
 
-    message = "No new Argo users to import today."
     msg = MIMEText(message, 'plain')
 
-    msg['Subject'] = "Argo Email: No New Users"
+    msg['Subject'] = subject
     msg['From'] = sender_email
     msg['To'] = receiver_email
 
