@@ -21,7 +21,7 @@ def reformat_csv(file_contents, last_user_id):
     Dataframe of the users that haven't yet been imported with only the values that are needed."""
     data = str(file_contents, 'utf-8')
     data = StringIO(data)
-    df = pd.read_csv(data)
+    df = pd.read_csv(data, keep_default_na=False)
     df = df.sort_values("id", axis=0)
     df = df.loc[df['id'] > last_user_id, ['id', 'provider', 'username', 'email', 'first_name', 'last_name']].reset_index(drop=True)
     return df
