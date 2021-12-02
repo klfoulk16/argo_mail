@@ -23,8 +23,9 @@ def reformat_csv(file_contents, last_user_id):
     data = StringIO(data)
     df = pd.read_csv(data, keep_default_na=False)
     df = df.sort_values("id", axis=0)
-    df = df.loc[df['id'] > last_user_id, ['id', 'provider', 'username', 'email', 'first_name', 'last_name']].reset_index(drop=True)
+    df = df.loc[df['id'] > last_user_id, ['id', 'provider', 'username', 'email', 'first_name', 'last_name', 'current_sign_in_at']].reset_index(drop=True)
     return df
+
 
 def subscribe_and_tag(df, mailchimp_client):
     """Pulls data from the dataframe, sends it to the tag/subscribe functions and prints results.
@@ -35,8 +36,10 @@ def subscribe_and_tag(df, mailchimp_client):
     """
     subscribers = []
     emails = []
+    not_logged_in_emails = []
     count = 0
     tagged = 0
+    count_not_logged_in = 0
     mailchimp_created = 0
     mailchimp_updated = 0
     mailchimp_error_count = 0
@@ -64,17 +67,21 @@ def subscribe_and_tag(df, mailchimp_client):
             "MMERGE8": df["username"][row]  # username
             }
         }
+        # check if df["current_sign_in_at"][row] is NA, if it is, add them to not_logged_in_emails
+        if not df["current_sign_in_at"][row]:
+            not_logged_in_emails.append(df["email"][row])
         subscribers.append(member)
         emails.append(df["email"][row])
         count += 1
     created, updated, error_count, errors = mailchimp.bulk_subscribe(subscribers, mailchimp_client)
-    tagged += mailchimp.bulk_tag(emails, mailchimp_client)
+    tagged += mailchimp.bulk_tag(emails, mailchimp_client, "649346")
+    count_not_logged_in += mailchimp.bulk_tag(not_logged_in_emails, mailchimp_client, "1619729")
     mailchimp_created += created
     mailchimp_updated += updated
     mailchimp_error_count += error_count
     for error in errors:
         mailchimp_errors.append(error)
-    mail_logs.new_imports_log(mailchimp_created, mailchimp_updated, mailchimp_error_count, errors, tagged)
+    mail_logs.new_imports_log(mailchimp_created, mailchimp_updated, mailchimp_error_count, errors, tagged, count_not_logged_in)
 
 
 def set_last_user_id(df):
