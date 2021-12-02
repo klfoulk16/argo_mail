@@ -21,16 +21,16 @@ def get_client(mailchimp_api_key, mailchimp_server):
     return client
 
 
-def bulk_tag(emails, client):
+def bulk_tag(emails, client, tag_id):
     """Takes a list of subscribed emails and adds specified mailchimp tag to all emails
     
     Args:
     emails: List of subscribed emails
     client: MailChimp client
+    tag_id: Str of the tag's ID number that should be applied
     
     Returns:
     If successful: Total number of emails tagged"""
-    tag_id = "649346"
     list_id = "d73bda636d"
     try:
         response = client.lists.batch_segment_members(
