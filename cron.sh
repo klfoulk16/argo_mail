@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 
-cd /Users/kellyfoulk/Documents/code/Argo_mail
+source ~/argo_mail/venv/bin/activate
 
-source venv/bin/activate
-
-python main.py
+cd ~/argo_mail && python3 main.py
 
 deactivate
 

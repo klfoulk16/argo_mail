@@ -67,7 +67,6 @@ def subscribe_and_tag(df, mailchimp_client):
             "MMERGE8": df["username"][row]  # username
             }
         }
-        # check if df["current_sign_in_at"][row] is NA, if it is, add them to not_logged_in_emails
         if not df["current_sign_in_at"][row]:
             not_logged_in_emails.append(df["email"][row])
         subscribers.append(member)
