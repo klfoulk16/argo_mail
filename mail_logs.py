@@ -6,7 +6,7 @@ from email.mime.text import MIMEText
 import os
 
 
-def new_imports_log(mailchimp_created, mailchimp_updated, mailchimp_error_count, errors, tagged):
+def new_imports_log(mailchimp_created, mailchimp_updated, mailchimp_error_count, errors, tagged, count_not_logged_in):
     """
     Sends email describing the lastest import.
     
@@ -15,6 +15,8 @@ def new_imports_log(mailchimp_created, mailchimp_updated, mailchimp_error_count,
     mailchimp_updated: Int, number of users updated in mailchimp list
     mailchimp_error_count: Int, number of errors while importing users
     errors: List, descriptions of errors that occured while importing users tagged
+    tagged: Int, number of users who were tagged as "Downloaded app"
+    count_not_logged_in: Int, number of users who were tagged as "New Not Logged In"
     """
 
     port = 465  # For SSL
@@ -23,7 +25,7 @@ def new_imports_log(mailchimp_created, mailchimp_updated, mailchimp_error_count,
     password = os.getenv('EMAIL_PASSWORD')
     smtp_server = "smtp.gmail.com"
     
-    message = f"Created: {mailchimp_created}, Updated: {mailchimp_updated}, Tagged: {tagged}, Errors: {mailchimp_error_count} - {errors}"
+    message = f"Created: {mailchimp_created}, Updated: {mailchimp_updated}, Tagged: {tagged}, Not Logged In: {count_not_logged_in}, Errors: {mailchimp_error_count} - {errors}"
     msg = MIMEText(message, 'plain')
 
     msg['Subject'] = f"Argo Email: {mailchimp_error_count} errors"
