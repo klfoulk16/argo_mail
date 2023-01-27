@@ -47,7 +47,7 @@ def subscribe_and_tag(df, mailchimp_client):
     for row in range(len(df.index)):
         if count == 499:
             created, updated, error_count, errors = mailchimp.bulk_subscribe(subscribers, mailchimp_client)
-            tagged += mailchimp.bulk_tag(emails, mailchimp_client)
+            tagged += mailchimp.bulk_tag(emails, mailchimp_client, 649346)
             mailchimp_created += created
             mailchimp_updated += updated
             mailchimp_error_count += error_count
